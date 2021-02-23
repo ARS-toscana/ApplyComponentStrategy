@@ -33,10 +33,20 @@ The input dataset is assumed to contain information for all the members of a pop
     - A set of binary variables, each associated to a component algorithm, indicating whether the person is identified by that algorithm
     - As an option: covariates 
 
-  - If the input is counts
+  - If the input is count
     - A set of binary variables, each associated to a component algorithm, indicating all the combinations of presence of the algorithms (eg only the first; both the first and the second; etc); 
     - As an option: covariates
     - The number of persons having the corresponding combination of algorithms and of strata
 
   #### CreateFigureComponentStrategy
 The input dataset is the final output dataset of the other function. The output dataset can changes if strata is present in the parameters.  
+
+
+- ## Main parameters
+
+#### ApplyComponentStrategy
+
+
+ #### CreateFigureComponentStrategy
+ 
+ 
