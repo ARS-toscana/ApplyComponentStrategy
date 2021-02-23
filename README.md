@@ -29,11 +29,11 @@ The input and output datasets may be either at individual level, or datasets of 
  #### ApplyComponentStrategy
 The input dataset is assumed to contain information for all the members of a population. The structure is as follows:
 
- - If the input is individual level data, each row is referred to a unit of observation; variables are
+  - If the input is individual level data, each row is referred to a unit of observation; variables are
    - A set of binary variables, each associated to a component algorithm, indicating whether the person is identified by that algorithm
    - As an option: covariates 
 
- - If the input is counts
+  - If the input is counts
    - A set of binary variables, each associated to a component algorithm, indicating all the combinations of presence of the algorithms (eg only the first; both the first and the second; etc); 
    - As an option: covariates
    - The number of persons having the corresponding combination of algorithms and of strata
