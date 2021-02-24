@@ -46,8 +46,40 @@ The input dataset is the final output dataset of the other function. The output 
 - ## Main parameters
 
 #### ApplyComponentStrategy
+  - dataset (str): name of the dataset to be processed
+  - individual (boolean, default=F): whether the dataset is at individual level (T) or a dataset of counts (F, the default)
+  - intermediate_output (boolean, only default=F): whether an intermediate individual-level dataset is saved for later analysis
+  - intermediate_output_name (str, only if intermediate_output=T, default=intermediate_output_dataset): if intermediate_output=T this is the name assigned to the intermediate dataset
+  - components (list of str): list of the names of the binary variables associated to the components
+  - composites (list of pairs of integers): each pair is associated to a composite algorithm; it contains the numbering in the two algorithms that form the component; the numbering refers to the order in the list –components-, or to the order of this list itself, but in the latter case the numbering starts from the number of components; e.g is there are 4 components, the numbering of this list starts with 5; no composite can be composed by algorithms associated with a numbering higher than the composite itself: i.e. the composite 8 can only be associated to a pair of integers smaller than 8
+  - labels_of_components (list of str, optional): this list must have the same length as –components-; each string is the label of the corresponding component
+  - expected_number (str, optional): variable containing the number of persons expected to be observed with the study variable of interest (in the corresponding stratum, if any)
+  - count_var (str, only if individual=F): name of the variable containing the counts
+  - strata (list of str, optional): list of the names of the variables containing covariates or strata
+  - nameN (str, default: ‘N’): prefix of the variables in the output dataset counting occurrences of algorithms 
+  - namePROP (str, default: ‘PROP’): prefix of the variables in the output dataset counting proportion of individuals detected by the algorithm 
+  - K (int, default=100): scale of the proportions
+  - namevar_10 (str): proportion of individuals in the algorithm A but not in B, scaled by K.
+  - namevar_11 (str): proportion of individuals both in the algorithm A and B, scaled by K.
+  - namevar_01 (str): proportion of individuals in the algorithm B but not in A, scaled by K.
+  - namevar_ (str): proportion of individuals in the population, scaled by K.
+  - namevar_TRUE: (str, optional, default=NULL) Variable containing the proportion of persons (scaled by K) expected to be observed with the study variable of interest
+  - namevar_strata (vector of str, optional, default=NULL): vector of the names of the variables containing covariates or strata.
+  - namevar_labels (str): variable containing labels.
+  - figure_name (str, default="figure"): namefile assigned to the figure. Path is included in the name,if any. The figure is saved in ".pdf".
 
 
- #### CreateFigureComponentStrategy
+
+#### CreateFigureComponentStrategy 
  
- 
+  - dataset: name of dataset 
+  - numcomponents: number of components
+  - namevar_10 (str): proportion of individuals in the algorithm A but not in B, scaled by K.
+  - namevar_11 (str): proportion of individuals both in the algorithm A and B, scaled by K.
+  - namevar_01 (str): proportion of individuals in the algorithm B but not in A, scaled by K.
+  - namevar_ (str): proportion of individuals in the population, scaled by K.
+  - namevar_TRUE (str, optional, default=NULL): variable containing the proportion of persons (scaled by K) expected to be observed with the study variable of interest
+  - namevar_strata (vector of str, optional, default=NULL): vector of the names of the variables containing covariates or strata.
+  - namevar_labels (str): variable containing labels.
+  - K (int, default=100): scale of the proportions.
+  - figure_name (str, default="figure"): namefile assigned to the figure. Path is included in the name, if any. The figure is saved in ".pdf".
