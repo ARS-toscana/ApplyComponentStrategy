@@ -40,7 +40,7 @@ The input dataset is assumed to contain information for all the members of a pop
     - The number of persons having the corresponding combination of algorithms and of strata
 
   #### CreateFigureComponentStrategy
-The input dataset is the final output dataset of the other function. The output dataset can changes if strata is present in the parameters.  
+The input dataset is the final output dataset of the other function. The output dataset can change if strata is present in the parameters.  
 
 
 - ## Main parameters
