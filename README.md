@@ -11,11 +11,12 @@ or no control over the primary data collection. Study variables classifying pres
  - ## Purpose
 
 There are two functions for this purpose:
+
  1.	ApplyComponentStrategy takes as input a dataset where component algorithms have been assigned, and the instructions to build composite algorithms based on them. It produces:
 
 
- -	a dataset where the composites have been calculated
- -	a dataset where the overlap of selected pairs of algorithms is computed
+    -	a dataset where the composites have been calculated
+    -	a dataset where the overlap of selected pairs of algorithms is computed
 
 
 The input and output datasets may be either at individual level, or datasets of counts.
