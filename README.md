@@ -83,3 +83,30 @@ The input dataset is the final output dataset of the other function. The output 
   - namevar_labels (str): variable containing labels.
   - K (int, default=100): scale of the proportions.
   - figure_name (str, default="figure"): namefile assigned to the figure. Path is included in the name, if any. The figure is saved in ".pdf".
+
+
+- ## Action
+
+  - Check that the assumptions of the parameters are correct (eg that all required parameters are included, that their assignment is coherent, etc), otherwise throw a error
+  - Create as many variables as the number of composites, and each such variable is 1 if either of the algorithms associated to the pair is 1
+  - If -intermediate_output-=T save the resulting dataset as -intermediate_output_name-
+  - Aggregate the dataset by the list of algorithms (both components and composites) and possibly by strata, by counting the rows (if individual=T) or summing –count_var- (otherwise)
+  - For each algorithm generate one row (per strata, if any)
+    - For each component algorithm a variable nameN_ containing the number of individuals in the algorithms
+    - For each composite algorithm
+      - Two variables _algA and _algB containing the pair of integer associated to the component (‘A’ being the first and ‘B’ the second)
+      - A variable nameN_10 containing the number of individuals in the algorithm A but not in B
+      - A variable nameN_11 containing the number of individuals both in algorithm A and B
+      - A variable nameN_01 containing the number of individuals in the algorithm B but not in A
+    - In both cases, a variable nameN_pop containing the number of the individuals in the population (in the stratum, if any)
+  - Compute proportions of all the nameN over nameN_pop, scaled by K
+  - If figure=T, also the function CreateFigureComponentStrategy will be activate. It will generate a bar graph figure as in the example
+  - Return the dataset
+
+ 
+- ## Structure of output
+
+
+- ## Example
+
+
