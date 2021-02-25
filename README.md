@@ -7,9 +7,9 @@ This repository contains the function ApplyComponentStrategy that is used in the
 
 ## Action to use function
 
-1. Go in the **code** section of the repository. 
+1. Go in the **Code** section of the repository. 
 
-2. Click on the green button **"Code"** and choose **Dowload ZIP** to download the whole content in you local computer.
+2. Click on the green button on the right **"Code"** and choose **Dowload ZIP** to download the whole content in you local computer.
 
 3. Once the folder is unzipped you will find in it:
    - the **to_run.R** file
