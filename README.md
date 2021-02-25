@@ -5,7 +5,7 @@ This repository contains the function ApplyComponentStrategy that is used in the
 
 
 
-## Action to use function
+## How to run the function
 
 1. Go in the **Code** section of the repository. 
 
