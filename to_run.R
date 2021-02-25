@@ -25,7 +25,7 @@ suppressWarnings(if (!file.exists(dirfigure)) dir.create(file.path( dirfigure)))
 # load the function
 setwd(thisdir)
 source("ApplyComponentStrategy_v13_1.R")
-source("CreateFigureComponentStrategy_v3.R")
+source("CreateFigureComponentStrategy_v4.R")
 
 
 
@@ -33,22 +33,8 @@ source("CreateFigureComponentStrategy_v3.R")
 #           ASSIGN PARAMETERS OF THE INPUT FILES
 ###################################################################
 
-#input<-fread(paste0(dirinput,"input_strata3.csv"))
-
-# input <-fread(paste0(diroutput,"output.csv"))
 input<-fread(paste0(dirinput,"input.csv"))
 
-
-# prova <- ApplyComponentStrategy(dataset = input,
-#                                numcomponents=4,
-#                                namevar_labels= "ord_alg" ,
-#                                namevar_10 ="PROP_10",
-#                                namevar_11 ="PROP_11",
-#                                namevar_01 ="PROP_01",
-#                                namevar_ ="PROP_" ,
-#                               namevar_TRUE = "PROP_TRUE" ,
-#                                K=1000
-#                                 )
 
 output<- ApplyComponentStrategy(dataset = input,
                                 individual = F,         ## F -> data counts
@@ -72,24 +58,9 @@ output<- ApplyComponentStrategy(dataset = input,
                                 count_var = 'persons',      ## only if individual = F
                                 expected_number="N_TRUE",   ## optional
                                 K=1000,
-                              #strata=list("orderDS") ,
-                              #  strata=list("orderDS","gender") ,   ## LIST
-                               #strata=list("orderDS","gender","nation") ,    ## optional
+                               #strata=list("orderDS") ,
                                aggregate=F,
-                               figure_name = paste0(dirfigure,"namefiguretest") ,# add a parameter: figure_directory
+                               dirfigure= dirfigure,
+                               figure_name = "namefiguretest" ,
                                output_name= paste0(diroutput,"output_dataset")
-            
                                )
-# 
-# #output=fread(paste0(diroutput,"output.csv"))
-# out <- CreateFigureComponentStrategy(dataset=input,
-#                                 
-#                                      # namevar_strata=c("orderDS","gender","nation"),   ## VECTOR
-#                                       namevar_TRUE="PROP_TRUE",
-#                                       K=1000,
-#                                      numcomponents=4,
-#                                      namevar_10 ="PROP_10",
-#                                      namevar_11 ="PROP_11",
-#                                      namevar_01 ="PROP_01",
-#                                      namevar_ ="PROP_" ,
-#                                      namevar_labels= "ord_alg" )
