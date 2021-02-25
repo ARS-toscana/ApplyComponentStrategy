@@ -40,7 +40,7 @@ CreateFigureComponentStrategy <- function(dataset,
     PROP_TRUE<-dataset[,eval(parse(text=namevar_TRUE ))]
   }
   
-  if (!is.null(namevar_strata)==TRUE) { col_strata <-subset(dataset,,namevar_strata)}
+  if (!is.null(namevar_strata)==TRUE) { col_strata <-subset(dataset,namevar_strata)}
   
   ord_alg<- dataset[,eval(parse(text=namevar_labels))]
   
