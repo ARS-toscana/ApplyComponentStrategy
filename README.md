@@ -13,7 +13,6 @@ This repository contains the function ApplyComponentStrategy that is used in the
 
 3. Once the folder is unzipped you will find in it:
    - the **to_run.R** file
-   - the **"p_"** folders containing the main programming files
    - the **"i_"** folder containing the input files
    - the **"g_"** folders containing the generated output (that can be delete as automatically generated every time you run the script)
 
