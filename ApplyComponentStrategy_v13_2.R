@@ -44,6 +44,7 @@ ApplyComponentStrategy <- function(dataset,
                                    components=NULL,  #
                                    composites=NULL,  #
                                    labels_of_components=components,
+                                   labels_of_composites=composites,
                                    count_var=NULL,
                                    expected_number=NULL,
                                    nameN="N",
@@ -200,7 +201,7 @@ ApplyComponentStrategy <- function(dataset,
        }else{
           ord_algA<-rbind(ord_algA,cbind(rep(A[[x]],dim)))
           ord_algB<-rbind(ord_algB,cbind(rep(B[[x]],dim)))
-          ord_alg<-rbind(ord_alg,cbind(rep(paste0(i,": ",A[[x]]," OR ",B[[x]]),dim)))
+          ord_alg<-rbind(ord_alg,cbind(rep(paste0(i,": ",labels_of_composites[[x]]),dim)))
           x=x+1
        }
     }

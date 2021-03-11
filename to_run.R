@@ -55,6 +55,8 @@ output<- ApplyComponentStrategy(dataset = input,
                                   "Possible, meaning H",
                                   "Narrow, meaning P",
                                   "Possible, meaning P"),
+                                labels_of_composites = c("Narrow", "H", "P", "Narrow and Possible H",
+                                                         "Narrow and Possible P", "Possible", "all", "all"),
                                 count_var = 'persons',      ## only if individual = F
                                 expected_number="N_TRUE",   ## optional
                                 K=1000,
