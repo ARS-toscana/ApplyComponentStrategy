@@ -24,7 +24,7 @@ suppressWarnings(if (!file.exists(dirfigure)) dir.create(file.path( dirfigure)))
 
 # load the function
 setwd(thisdir)
-source("ApplyComponentStrategy_v13_1.R")
+source("ApplyComponentStrategy_v13_2.R")
 source("CreateFigureComponentStrategy_v4.R")
 
 
