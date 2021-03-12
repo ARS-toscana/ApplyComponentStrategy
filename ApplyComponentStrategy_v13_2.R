@@ -129,16 +129,26 @@ ApplyComponentStrategy <- function(dataset,
     tot<-numcomposites+numcomponents   
     
     #####################################################################
-    
+    dataset<-input
     A<-vector()      #numeric vector:  first component of the composites
     B<-vector()      #numeric vector:  first component of the composites
+<<<<<<< HEAD
+=======
+    varname_composites<-c()
+>>>>>>> 7a4e529f4f76f101e5ef2988b8d98aeddbbaf232
     varname<-copy(components)
     for (i in 1:numcomposites){
       A<-append(A, as.numeric(composites[[i]][1]))
       B<-append(B, as.numeric(composites[[i]][2]))
       j=numcomponents+i
+<<<<<<< HEAD
       varname <- append(varname, paste("alg", j ,sep=""))
       dataset[[tail(varname, -4)[[i]]]]=ifelse(dataset[[varname[[A[[i]]]]]]|dataset[[varname[[B[[i]]]]]],1,0)
+=======
+      varname_composites <- append(varname_composites, paste("alg", j ,sep=""))
+      varname <- append(varname, paste("alg", j ,sep=""))
+      dataset[[varname_composites[[i]]]]=ifelse(dataset[[varname[[A[[i]]]]]]|dataset[[varname[[B[[i]]]]]],1,0)
+>>>>>>> 7a4e529f4f76f101e5ef2988b8d98aeddbbaf232
     }
     
     #save the first dataset 
