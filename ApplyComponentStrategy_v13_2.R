@@ -13,6 +13,7 @@
 #' @param components (list of str, default=NULL). List of the names of the binary variables associated to the components.
 #' @param composites (list of pairs of integers, default=NULL). Each pair is associated to a composite algorithm; it contains the numbering in the two algorithms that form the component; the numbering refers to the order in the list -components-, or to the order of this list itself, but in the latter case the numbering starts from the number of components.
 #' @param labels_of_components (list of str, optional, default=components). This list must have the same length as -components-; each string is the label of the corresponding component.
+#' @param labels_of_composites (list of str, optional, default=composites). This list must have the same length as -composites-; each string is the label of the corresponding component.
 #' @param expected_number (str, optional, default=NULL). Variable containing the number of persons expected to be observed with the study variable of interest (in the corresponding stratum, if any).
 #' @param count_var (str, only if individual=FALSE). Name of the variable containting the counts.
 #' @param strata (list of str, optional, default=NULL). List of the names of the variables containing covariates or strata.
