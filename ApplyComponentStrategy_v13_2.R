@@ -132,13 +132,13 @@ ApplyComponentStrategy <- function(dataset,
     
     A<-vector()      #numeric vector:  first component of the composites
     B<-vector()      #numeric vector:  first component of the composites
-    varname<-c(components) #character vector: each string is the label of the corresponding algorithm
-    for (i in 0+1:numcomposites){
-      A[[i]]<-as.numeric(composites[[i]][1])  
-      B[[i]]<-as.numeric(composites[[i]][2])
+    varname<-copy(components)
+    for (i in 1:numcomposites){
+      A<-append(A, as.numeric(composites[[i]][1]))
+      B<-append(B, as.numeric(composites[[i]][2]))
       j=numcomponents+i
-      varname[[j]] <- paste("alg", j ,sep="")
-      dataset[[varname[[j]]]]=ifelse(dataset[[varname[[A[[i]]]]]]|dataset[[varname[[B[[i]]]]]],1,0)
+      varname <- append(varname, paste("alg", j ,sep=""))
+      dataset[[tail(varname, -4)[[i]]]]=ifelse(dataset[[varname[[A[[i]]]]]]|dataset[[varname[[B[[i]]]]]],1,0)
     }
     
     #save the first dataset 
@@ -147,22 +147,16 @@ ApplyComponentStrategy <- function(dataset,
       save(list=sapply(strsplit(intermediate_output_name, "/"), tail, 1), file=paste0(intermediate_output_name,".RData")) 
     }
     
-    
     ##############################################
     
-    algA<-vector()   #character vector: each string is the label of the corresponding first component of the composites
-    algB<-vector()   #character vector: each string is the label of the corresponding second component of the composites
-    x=1
-    for (i in 0+1:tot){
-      if(i<=numcomponents){
-        algA[[i]]<-varname[[i]]
-        algB[[i]]<-0
-      }else{
-        algA[[i]]<-varname[[A[[x]]]]
-        algB[[i]]<-varname[[B[[x]]]]
-        x=x+1
-      }
+    algA<-copy(components)  #character vector: each string is the label of the corresponding first component of the composites
+    algB<-integer(numcomponents) #character vector: each string is the label of the corresponding second component of the composites
+    
+    for (i in 1:numcomposites) {
+      algA<-append(algA, varname[[A[[i]]]])
+      algB<-append(algB, varname[[B[[i]]]])
     }
+    
     ##############################################
     
     if (is.null(strata)==T){
