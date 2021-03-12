@@ -64,8 +64,8 @@ ApplyComponentStrategy <- function(dataset,
                                    dirfigure,
                                    figure_name="figure"){
   
-
- if (aggregate==F) { 
+  
+  if (aggregate==F) { 
     #install packages
     if (!require("data.table")) install.packages("data.table")
     library(data.table)
@@ -77,57 +77,44 @@ ApplyComponentStrategy <- function(dataset,
     library(tidyr)                               #used for pivot_longer()
     if (!require("ggplot2")) install.packages("ggplot2")
     library(ggplot2)
-   
+    
     ################ parameter composites #############################
-    ## check that it is a list
-    if (!is.list(composites)){  
-      stop("parameter composites must be a list of pairs of integers")
+    ## check that it is a list (do NOT use is.list())
+    if (!inherits(composites, "list")){  
+      stop("parameter composites must be a list of one dimensional vectors, each of them containing integers")
     }
     
     ## check that it is a list of lists
-    for (i in 0+1:length(composites)){
-      if (mode(composites[[i]][1])!="list"){
-        stop("parameter composites must be a list of lists")
+    check_and_transform <- function(tmp_elem) {
+      if (inherits(tmp_elem, "numeric")){  ## check if atomic -> transform to list
+        tmp_elem <- as.list(tmp_elem)
       }
-      if (mode(composites[[i]][2])!="list"){
-        stop("parameter composites must be a list of lists")
+      if (!inherits(tmp_elem, "list") | length(tmp_elem) < 2) { ## check if list and has at least two elements
+        stop("parameter composites must be a list of one dimensional vectors, each of them containing integers")
+      } else if (length(tmp_elem) > 4) { ## number in composites <= number of algorithm
+        stop("the numbers of parameter composites must be less or equal than the number of algorithms")
       }
+      
+      tmp_elem <- lapply(tmp_elem, is_integer)
+      return(tmp_elem)
     }
     
-    ## check that the numbers are integers
-    for (i in 0+1:length(composites)){
-      if ((composites[[i]][[1]] %% 1 == 0) != TRUE){
-        stop("parameter composites must be a list of pairs of integers")
+    # check if element is a integer (even if type double)
+    is_integer <- function(tmp_elem) {
+      if (tmp_elem %% 1 != 0){
+        stop("parameter composites must be a list of one dimensional vectors, each of them containing integers")
       }
-      if ((composites[[i]][[2]] %% 1 == 0) != TRUE){
-        stop("parameter composites must be a list of pairs of integers")
-      }
+      return(tmp_elem)
     }
     
-    ## check that the lists are of length 2
-    for (i in 0+1:length(composites)){
-      if (length(composites[[i]])!=2){
-        stop("parameter composites must be a list containing lists of pairs of integers")
-      }
-    }
-    
-    ## number in composites < number of algorithm
-    v<-(length(components)+1):(length(components)+length(composites))
-    for (i in 0+1:length(composites)) {
-      if ( as.numeric(composites[[i]][1]) >=v[[i]]){
-        stop("the numbers in parameter composites must be less than number of algorithm")
-      }
-      if ( as.numeric(composites[[i]][2]) >=v[[i]]){
-        stop("the numbers in parameter composites must be less than number of algorithm")
-      }
-    }
+    composites = lapply(composites, check_and_transform)
     
     ################## parameter labels_of_components ##################
     ## check length of parameter labels_of_components
     if (length(labels_of_components)!=length(components)){
       stop("parameter labels_of_components must have the same length as components")
     }
-      
+    
     ####################################################################
     #delete row with missing components
     input<-as.data.frame(input)
@@ -135,7 +122,7 @@ ApplyComponentStrategy <- function(dataset,
     input<-as.data.table(input)
     
     ######################################################################
-
+    
     numcomposites<-length(composites)  #number of composites
     numcomponents=length(components)   #number of components
     tot<-numcomposites+numcomponents   
@@ -146,20 +133,20 @@ ApplyComponentStrategy <- function(dataset,
     B<-vector()      #numeric vector:  first component of the composites
     varname<-c(components) #character vector: each string is the label of the corresponding algorithm
     for (i in 0+1:numcomposites){
-         A[[i]]<-as.numeric(composites[[i]][1])  
-         B[[i]]<-as.numeric(composites[[i]][2])
-         j=numcomponents+i
-         varname[[j]] <- paste("alg", j ,sep="")
-         dataset[[varname[[j]]]]=ifelse(dataset[[varname[[A[[i]]]]]]|dataset[[varname[[B[[i]]]]]],1,0)
+      A[[i]]<-as.numeric(composites[[i]][1])  
+      B[[i]]<-as.numeric(composites[[i]][2])
+      j=numcomponents+i
+      varname[[j]] <- paste("alg", j ,sep="")
+      dataset[[varname[[j]]]]=ifelse(dataset[[varname[[A[[i]]]]]]|dataset[[varname[[B[[i]]]]]],1,0)
     }
     
     
     #save the first dataset 
     if (intermediate_output==T){
-        assign(sapply(strsplit(intermediate_output_name, "/"), tail, 1),dataset)
-        save(list=sapply(strsplit(intermediate_output_name, "/"), tail, 1), file=paste0(intermediate_output_name,".RData")) 
+      assign(sapply(strsplit(intermediate_output_name, "/"), tail, 1),dataset)
+      save(list=sapply(strsplit(intermediate_output_name, "/"), tail, 1), file=paste0(intermediate_output_name,".RData")) 
     }
-  
+    
     
     ##############################################
     
@@ -179,13 +166,13 @@ ApplyComponentStrategy <- function(dataset,
     ##############################################
     
     if (is.null(strata)==T){
-       dim=1
+      dim=1
     }else{
-       n<-list()          #list of character vector: levels of the variables containing strata   
-       for(i in 0+1:length(strata)){ 
-          n[i]<-list(levels(strata(dataset[[strata[[i]]]])))
-       }
-       dim=prod(prod(lengths(n)))       #product of the dimensions 
+      n<-list()          #list of character vector: levels of the variables containing strata   
+      for(i in 0+1:length(strata)){ 
+        n[i]<-list(levels(strata(dataset[[strata[[i]]]])))
+      }
+      dim=prod(prod(lengths(n)))       #product of the dimensions 
     }
     
     
@@ -194,16 +181,16 @@ ApplyComponentStrategy <- function(dataset,
     ord_alg<-vector()   #labels
     x=1
     for (i in 0+1:tot){
-       if(i<=numcomponents){
-          ord_algA<-rbind(ord_algA,cbind(rep("-",dim)))
-          ord_algB<-rbind(ord_algB,cbind(rep("-",dim)))
-          ord_alg<-rbind(ord_alg,cbind(rep(paste0(i,": ",labels_of_components[[i]] ),dim)))
-       }else{
-          ord_algA<-rbind(ord_algA,cbind(rep(A[[x]],dim)))
-          ord_algB<-rbind(ord_algB,cbind(rep(B[[x]],dim)))
-          ord_alg<-rbind(ord_alg,cbind(rep(paste0(i,": ",labels_of_composites[[x]]),dim)))
-          x=x+1
-       }
+      if(i<=numcomponents){
+        ord_algA<-rbind(ord_algA,cbind(rep("-",dim)))
+        ord_algB<-rbind(ord_algB,cbind(rep("-",dim)))
+        ord_alg<-rbind(ord_alg,cbind(rep(paste0(i,": ",labels_of_components[[i]] ),dim)))
+      }else{
+        ord_algA<-rbind(ord_algA,cbind(rep(A[[x]],dim)))
+        ord_algB<-rbind(ord_algB,cbind(rep(B[[x]],dim)))
+        ord_alg<-rbind(ord_alg,cbind(rep(paste0(i,": ",labels_of_composites[[x]]),dim)))
+        x=x+1
+      }
     }
     colnames(ord_alg)<-"ord_alg"
     colnames(ord_algA)<-"ord_algA"
@@ -212,12 +199,12 @@ ApplyComponentStrategy <- function(dataset,
     ##############################################
     
     if (individual==F ){
-       count_var <-count_var   #parameter count_var(if the dataset is a dataset of counts)
+      count_var <-count_var   #parameter count_var(if the dataset is a dataset of counts)
     }else{
-       dataset[["n"]]<-1   #creates a variable containing 1 (if the dataset is at individual level)
-       count_var<-'n'      
+      dataset[["n"]]<-1   #creates a variable containing 1 (if the dataset is at individual level)
+      count_var<-'n'      
     }
-  
+    
     N_<-rbind()          #number of the individuals in the first algorithm or in the second argorithm
     N_00<-rbind()        #number of individuals who are not in the two algorithms
     N_01<-rbind()        #number of individuals in the second algorithm
@@ -272,14 +259,14 @@ ApplyComponentStrategy <- function(dataset,
     ####################
     
     if (is.null(strata)==F){
-        col_strata<-N_[,-"V1"]  #variables containing strata
+      col_strata<-N_[,-"V1"]  #variables containing strata
     }
-   
+    
     #################### 
     
     N_pop<-cbind(N_$V1+N_00$V1,deparse.level = 2)    #total number of individuals
     colnames(N_pop)<-"N_pop"
-   
+    
     ####################
     
     #only if expeced_number is a string (present in datataset)
@@ -314,9 +301,9 @@ ApplyComponentStrategy <- function(dataset,
     colnames(PROP_01)<-"PROP_01"
     colnames(PROP_11)<-"PROP_11"
     
-     
+    
     ###################################################################################
-
+    
     #########  output
     if (!is.null(expected_number)==TRUE){
       x<-data.frame(ord_alg,N_TRUE$V1,N_00$V1,N_$V1,N_pop,N_01$V1,N_10$V1,N_11$V1,ord_algA,ord_algB,PROP_TRUE,PROP_,PROP_10,PROP_11,PROP_01)
@@ -346,44 +333,44 @@ ApplyComponentStrategy <- function(dataset,
     
     if (is.null(strata)==T){ x[, "ord_alg"] <- as.character(x[, "ord_alg"])}
     x<-as.data.table(x)
-
+    
     #save the second output 
     assign(sapply(strsplit(output_name, "/"), tail, 1),x)
     save(list=sapply(strsplit(output_name, "/"), tail, 1), file=paste0(output_name,".RData")) 
     
     if (figure==T){
-
-              CreateFigureComponentStrategy(dataset=x,
-                                            numcomponents,
-                                            namevar_10 = paste0(namePROP,"_10"),
-                                            namevar_11 = paste0(namePROP,"_11") ,
-                                            namevar_01 = paste0(namePROP,"_01") ,
-                                            namevar_ = paste0(namePROP,"_"),
-                                            if (is.null(expected_number)){namevar_TRUE = NULL}else{namevar_TRUE=paste0(namePROP,"_TRUE")} ,
-                                            if (is.null(strata)){namevar_strata = NULL}else{namevar_strata=eval(flatten_chr(strata))} ,
-                                            namevar_labels="ord_alg",
-                                            K=K,
-                                            dirfigure,
-                                            figure_name)
+      
+      CreateFigureComponentStrategy(dataset=x,
+                                    numcomponents,
+                                    namevar_10 = paste0(namePROP,"_10"),
+                                    namevar_11 = paste0(namePROP,"_11") ,
+                                    namevar_01 = paste0(namePROP,"_01") ,
+                                    namevar_ = paste0(namePROP,"_"),
+                                    if (is.null(expected_number)){namevar_TRUE = NULL}else{namevar_TRUE=paste0(namePROP,"_TRUE")} ,
+                                    if (is.null(strata)){namevar_strata = NULL}else{namevar_strata=eval(flatten_chr(strata))} ,
+                                    namevar_labels="ord_alg",
+                                    K=K,
+                                    dirfigure,
+                                    figure_name)
     }  
     
     return(x)
     
   }else{  
-
-     CreateFigureComponentStrategy(dataset=dataset,
-                                   numcomponents,
-                                   namevar_10 ,
-                                   namevar_11 ,
-                                   namevar_01 ,
-                                   namevar_ ,
-                                   namevar_TRUE ,    
-                                   namevar_strata ,
-                                   namevar_labels,
-                                   K,
-                                   dirfigure,
-                                   figure_name)
-      
+    
+    CreateFigureComponentStrategy(dataset=dataset,
+                                  numcomponents,
+                                  namevar_10 ,
+                                  namevar_11 ,
+                                  namevar_01 ,
+                                  namevar_ ,
+                                  namevar_TRUE ,    
+                                  namevar_strata ,
+                                  namevar_labels,
+                                  K,
+                                  dirfigure,
+                                  figure_name)
+    
   }
 }
 
