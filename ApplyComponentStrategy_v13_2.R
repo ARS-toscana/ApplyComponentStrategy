@@ -87,23 +87,25 @@ ApplyComponentStrategy <- function(dataset,
     
     ## check that it is a list of lists
     check_and_transform <- function(tmp_elem) {
+      error_message = "parameter composites must be a list of one dimensional vectors, each of them containing integers"
       if (inherits(tmp_elem, "numeric")){  ## check if atomic -> transform to list
         tmp_elem <- as.list(tmp_elem)
       }
       if (!inherits(tmp_elem, "list") | length(tmp_elem) < 2) { ## check if list and has at least two elements
-        stop("parameter composites must be a list of one dimensional vectors, each of them containing integers")
+        stop(message)
       } else if (length(tmp_elem) > 4) { ## number in composites <= number of algorithm
         stop("the numbers of parameter composites must be less or equal than the number of algorithms")
       }
       
-      tmp_elem <- lapply(tmp_elem, is_integer)
+      tmp_elem <- tryCatch(lapply(tmp_elem, is_integer, error_message),
+                           error = function(e) {stop(error_message)})
       return(tmp_elem)
     }
     
     # check if element is a integer (even if type double)
-    is_integer <- function(tmp_elem) {
+    is_integer <- function(tmp_elem, error_message = F) {
       if (tmp_elem %% 1 != 0){
-        stop("parameter composites must be a list of one dimensional vectors, each of them containing integers")
+        stop(error_message)
       }
       return(tmp_elem)
     }
@@ -118,9 +120,7 @@ ApplyComponentStrategy <- function(dataset,
     
     ####################################################################
     #delete row with missing components
-    input<-as.data.frame(input)
-    input<-input[complete.cases(input[,components]),]
-    input<-as.data.table(input)
+    input<-input[complete.cases(input[,..components]),]
     
     ######################################################################
     
@@ -140,7 +140,6 @@ ApplyComponentStrategy <- function(dataset,
       varname[[j]] <- paste("alg", j ,sep="")
       dataset[[varname[[j]]]]=ifelse(dataset[[varname[[A[[i]]]]]]|dataset[[varname[[B[[i]]]]]],1,0)
     }
-    
     
     #save the first dataset 
     if (intermediate_output==T){
