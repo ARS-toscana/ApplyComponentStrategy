@@ -120,7 +120,7 @@ ApplyComponentStrategy <- function(dataset,
     
     ####################################################################
     #delete row with missing components
-    input<-input[complete.cases(input[,..components]),]
+    dataset<-dataset[complete.cases(dataset[,..components]),]
     
     ######################################################################
     
@@ -140,6 +140,19 @@ ApplyComponentStrategy <- function(dataset,
       varname <- append(varname, paste("alg", j ,sep=""))
       dataset[[tail(varname, -4)[[i]]]]=ifelse(dataset[[varname[[A[[i]]]]]]|dataset[[varname[[B[[i]]]]]],1,0)
     }
+    
+    test_varname<-copy(components)
+    test_df <- copy(input)
+    for (comp in composites){
+      tmp_lenght <- length(test_varname) + 1
+      test_varname <- append(test_varname, paste("alg", tmp_lenght, sep=""))
+      elem_or <- FALSE
+      for (elem in comp) {
+        elem_or <- elem_or|test_df[[test_varname[[elem]]]]
+      }
+      test_df[[test_varname[[tmp_lenght]]]] <- as.integer(elem_or)
+    }
+    print(test_df)
     
     #save the first dataset 
     if (intermediate_output==T){
@@ -218,19 +231,19 @@ ApplyComponentStrategy <- function(dataset,
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
       }else{
         N_<- rbind(N_,
-                   dataset[get(algA[[i]])==1 | eval(parse(text = algB[[i]]))==1, sum(get(count_var)),
+                   dataset[get(algA[[i]])==1 | get(algB[[i]])==1, sum(get(count_var)),
                            by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_00<- rbind(N_00,
-                     dataset[get(algA[[i]])!=1 & eval(parse(text = algB[[i]]))!=1, sum(get(count_var)),
+                     dataset[get(algA[[i]])!=1 & get(algB[[i]])!=1, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_01<- rbind(N_01,
-                     dataset[get(algA[[i]])==0 & eval(parse(text = algB[[i]]))==1, sum(get(count_var)),
+                     dataset[get(algA[[i]])==0 & get(algB[[i]])==1, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_10<- rbind(N_10,
-                     dataset[get(algA[[i]])==1 & eval(parse(text = algB[[i]]))==0, sum(get(count_var)),
+                     dataset[get(algA[[i]])==1 & get(algB[[i]])==0, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_11<- rbind(N_11,
-                     dataset[get(algA[[i]])==1 & eval(parse(text = algB[[i]]))==1, sum(get(count_var)),
+                     dataset[get(algA[[i]])==1 & get(algB[[i]])==1, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
       }  
     }
@@ -258,7 +271,7 @@ ApplyComponentStrategy <- function(dataset,
                                        mean(get(expected_number)),
                                        by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         }else{
-          N_TRUE<-rbind(N_TRUE,dataset[get(algA[[i]])==1| eval(parse(text = algB[[i]]))==1 ,
+          N_TRUE<-rbind(N_TRUE,dataset[get(algA[[i]])==1| get(algB[[i]])==1 ,
                                        mean(get(expected_number)),
                                        by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         }
