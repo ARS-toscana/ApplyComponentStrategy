@@ -218,19 +218,19 @@ ApplyComponentStrategy <- function(dataset,
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
       }else{
         N_<- rbind(N_,
-                   dataset[get(algA[[i]])==1 | eval(parse(text = algB[[i]]))==1, sum(get(count_var)),
+                   dataset[get(algA[[i]])==1 | get(algB[[i]])==1, sum(get(count_var)),
                            by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_00<- rbind(N_00,
-                     dataset[get(algA[[i]])!=1 & eval(parse(text = algB[[i]]))!=1, sum(get(count_var)),
+                     dataset[get(algA[[i]])!=1 & get(algB[[i]])!=1, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_01<- rbind(N_01,
-                     dataset[get(algA[[i]])==0 & eval(parse(text = algB[[i]]))==1, sum(get(count_var)),
+                     dataset[get(algA[[i]])==0 & get(algB[[i]])==1, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_10<- rbind(N_10,
-                     dataset[get(algA[[i]])==1 & eval(parse(text = algB[[i]]))==0, sum(get(count_var)),
+                     dataset[get(algA[[i]])==1 & get(algB[[i]])==0, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_11<- rbind(N_11,
-                     dataset[get(algA[[i]])==1 & eval(parse(text = algB[[i]]))==1, sum(get(count_var)),
+                     dataset[get(algA[[i]])==1 & get(algB[[i]])==1, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
       }  
     }
@@ -258,7 +258,7 @@ ApplyComponentStrategy <- function(dataset,
                                        mean(get(expected_number)),
                                        by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         }else{
-          N_TRUE<-rbind(N_TRUE,dataset[get(algA[[i]])==1| eval(parse(text = algB[[i]]))==1 ,
+          N_TRUE<-rbind(N_TRUE,dataset[get(algA[[i]])==1| get(algB[[i]])==1 ,
                                        mean(get(expected_number)),
                                        by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         }
