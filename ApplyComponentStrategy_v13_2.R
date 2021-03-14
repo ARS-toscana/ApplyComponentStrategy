@@ -130,6 +130,32 @@ ApplyComponentStrategy <- function(dataset,
     
     #####################################################################
     
+    components_df <- tibble(ord_alg = character(),
+                            N_00 = numeric(),
+                            N_ = numeric(),
+                            N_marginals = numeric(),
+                            N_values = numeric(),
+                            ord_algs = numeric(),
+                            PROP_marginals = numeric(),
+                            PROP_values = numeric())
+    
+    # N_pop PROP_TRUE
+    # N_TRUE = mean(get(expected_number))
+    
+    for (component in components) {
+      components_df %>%
+        add_row()
+      components_df = dataset %>%
+        filter(get("alg1") == 1) %>%
+        summarise(temp_var = sum(persons))
+      
+    }
+    
+    temp_df <- copy(input)
+    temp_df <- temp_df %>%
+      filter(get("alg1") == 1) %>%
+      summarise(temp_var = sum(persons))
+    
     A<-vector()      #numeric vector:  first component of the composites
     B<-vector()      #numeric vector:  first component of the composites
     varname<-copy(components)
@@ -267,11 +293,11 @@ ApplyComponentStrategy <- function(dataset,
       N_TRUE<-rbind()
       for (i in 1:tot){
         if(i<=numcomponents){
-          N_TRUE<-rbind(N_TRUE,dataset[get(algA[[i]])==1,
+          N_TRUE<-rbind(N_TRUE,dataset[get("alg1")==1,
                                        mean(get(expected_number)),
                                        by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         }else{
-          N_TRUE<-rbind(N_TRUE,dataset[get(algA[[i]])==1| get(algB[[i]])==1 ,
+          N_TRUE<-rbind(N_TRUE,dataset[get("alg1")==1| get("alg2")==1 ,
                                        mean(get(expected_number)),
                                        by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         }
