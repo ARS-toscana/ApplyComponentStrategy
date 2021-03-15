@@ -104,7 +104,7 @@ ApplyComponentStrategy <- function(dataset,
     
     # check if element is a integer (even if type double)
     is_integer <- function(tmp_elem, error_message = F) {
-      if (tmp_elem %% 1 != 0){
+      if (sum(tmp_elem %% 1) != 0){
         stop(error_message)
       }
       return(tmp_elem)
@@ -130,55 +130,25 @@ ApplyComponentStrategy <- function(dataset,
     
     #####################################################################
     
-    components_df <- tibble(ord_alg = character(),
-                            N_00 = numeric(),
-                            N_ = numeric(),
-                            N_marginals = numeric(),
-                            N_values = numeric(),
-                            ord_algs = numeric(),
-                            PROP_marginals = numeric(),
-                            PROP_values = numeric())
-    
     # N_pop PROP_TRUE
     # N_TRUE = mean(get(expected_number))
     
-    for (component in components) {
-      components_df %>%
-        add_row()
-      components_df = dataset %>%
-        filter(get("alg1") == 1) %>%
-        summarise(temp_var = sum(persons))
-      
-    }
-    
-    temp_df <- copy(input)
-    temp_df <- temp_df %>%
-      filter(get("alg1") == 1) %>%
-      summarise(temp_var = sum(persons))
-    
-    A<-vector()      #numeric vector:  first component of the composites
-    B<-vector()      #numeric vector:  first component of the composites
+    A<-list()      #numeric vector:  first component of the composites
+    B<-list()      #numeric vector:  first component of the composites
     varname<-copy(components)
-    for (i in 1:numcomposites){
-      A<-append(A, as.numeric(composites[[i]][1]))
-      B<-append(B, as.numeric(composites[[i]][2]))
-      j=numcomponents+i
-      varname <- append(varname, paste("alg", j ,sep=""))
-      dataset[[tail(varname, -4)[[i]]]]=ifelse(dataset[[varname[[A[[i]]]]]]|dataset[[varname[[B[[i]]]]]],1,0)
-    }
-    
-    test_varname<-copy(components)
-    test_df <- copy(input)
     for (comp in composites){
-      tmp_lenght <- length(test_varname) + 1
-      test_varname <- append(test_varname, paste("alg", tmp_lenght, sep=""))
+      A<-append(A, list(comp[[1]]))
+      B<-append(B, list(comp[[2]]))
+      tmp_lenght <- length(varname) + 1
+      varname <- append(varname, paste("alg", tmp_lenght, sep=""))
       elem_or <- FALSE
       for (elem in comp) {
-        elem_or <- elem_or|test_df[[test_varname[[elem]]]]
+        for (single_alg in elem) {
+          elem_or <- elem_or|dataset[[varname[[single_alg]]]]
+        }
       }
-      test_df[[test_varname[[tmp_lenght]]]] <- as.integer(elem_or)
+      dataset[[varname[[tmp_lenght]]]] <- as.integer(elem_or)
     }
-    print(test_df)
     
     #save the first dataset 
     if (intermediate_output==T){
@@ -293,11 +263,11 @@ ApplyComponentStrategy <- function(dataset,
       N_TRUE<-rbind()
       for (i in 1:tot){
         if(i<=numcomponents){
-          N_TRUE<-rbind(N_TRUE,dataset[get("alg1")==1,
+          N_TRUE<-rbind(N_TRUE,dataset[get(algA[[i]])==1,
                                        mean(get(expected_number)),
                                        by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         }else{
-          N_TRUE<-rbind(N_TRUE,dataset[get("alg1")==1| get("alg2")==1 ,
+          N_TRUE<-rbind(N_TRUE,dataset[get(algA[[i]])==1| get(algB[[i]])==1 ,
                                        mean(get(expected_number)),
                                        by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         }
