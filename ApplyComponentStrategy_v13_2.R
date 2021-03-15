@@ -96,7 +96,7 @@ ApplyComponentStrategy <- function(dataset,
       } else if (length(tmp_elem) > 4) { ## number in composites <= number of algorithm
         stop("the numbers of parameter composites must be less or equal than the number of algorithms")
       }
-      
+      # Apply the function is_integer to all composites and in case of errors use the predefined message
       tmp_elem <- tryCatch(lapply(tmp_elem, is_integer, error_message),
                            error = function(e) {stop(error_message)})
       return(tmp_elem)
@@ -104,12 +104,14 @@ ApplyComponentStrategy <- function(dataset,
     
     # check if element is a integer (even if type double)
     is_integer <- function(tmp_elem, error_message = F) {
-      if (sum(tmp_elem %% 1) != 0){
+      #If at least one of the element of the vector is =! 0 then raise error (works also on single integers)
+      if (sum(tmp_elem %% 1) != 0){ 
         stop(error_message)
       }
       return(tmp_elem)
     }
     
+    # Apply the chec on composites
     composites = lapply(composites, check_and_transform)
     
     ################## parameter labels_of_components ##################
@@ -134,19 +136,21 @@ ApplyComponentStrategy <- function(dataset,
     # N_TRUE = mean(get(expected_number))
     
     A<-list()      #numeric vector:  first component of the composites
-    B<-list()      #numeric vector:  first component of the composites
+    B<-list()      #numeric vector:  second component of the composites
     varname<-copy(components)
     for (comp in composites){
       A<-append(A, list(comp[[1]]))
       B<-append(B, list(comp[[2]]))
       tmp_lenght <- length(varname) + 1
-      varname <- append(varname, paste("alg", tmp_lenght, sep=""))
-      elem_or <- FALSE
+      varname <- append(varname, paste("alg", tmp_lenght, sep="")) # Create alg5, alg6, alg7,...
+      elem_or <- FALSE # binary vectors containing the column for the alg5 (and then alg6...)
       for (elem in comp) {
-        for (single_alg in elem) {
+        for (single_alg in elem) {# cicle for every list inside each element of each composite
+          # sum the vectors by element using a or condition
           elem_or <- elem_or|dataset[[varname[[single_alg]]]]
         }
       }
+      # Apply the resulting vector to the column
       dataset[[varname[[tmp_lenght]]]] <- as.integer(elem_or)
     }
     
