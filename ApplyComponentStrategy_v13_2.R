@@ -96,7 +96,7 @@ ApplyComponentStrategy <- function(dataset,
       } else if (length(tmp_elem) > 4) { ## number in composites <= number of algorithm
         stop("the numbers of parameter composites must be less or equal than the number of algorithms")
       }
-      
+      # Apply the function is_integer to all composites and in case of errors use the predefined message
       tmp_elem <- tryCatch(lapply(tmp_elem, is_integer, error_message),
                            error = function(e) {stop(error_message)})
       return(tmp_elem)
@@ -104,12 +104,14 @@ ApplyComponentStrategy <- function(dataset,
     
     # check if element is a integer (even if type double)
     is_integer <- function(tmp_elem, error_message = F) {
-      if (tmp_elem %% 1 != 0){
+      #If at least one of the element of the vector is =! 0 then raise error (works also on single integers)
+      if (sum(tmp_elem %% 1) != 0){ 
         stop(error_message)
       }
       return(tmp_elem)
     }
     
+    # Apply the chec on composites
     composites = lapply(composites, check_and_transform)
     
     ################## parameter labels_of_components ##################
@@ -120,7 +122,7 @@ ApplyComponentStrategy <- function(dataset,
     
     ####################################################################
     #delete row with missing components
-    input<-input[complete.cases(input[,..components]),]
+    dataset<-dataset[complete.cases(dataset[,..components]),]
     
     ######################################################################
     
@@ -130,15 +132,26 @@ ApplyComponentStrategy <- function(dataset,
     
     #####################################################################
     
-    A<-vector()      #numeric vector:  first component of the composites
-    B<-vector()      #numeric vector:  first component of the composites
-    varname<-c(components) #character vector: each string is the label of the corresponding algorithm
-    for (i in 0+1:numcomposites){
-      A[[i]]<-as.numeric(composites[[i]][1])  
-      B[[i]]<-as.numeric(composites[[i]][2])
-      j=numcomponents+i
-      varname[[j]] <- paste("alg", j ,sep="")
-      dataset[[varname[[j]]]]=ifelse(dataset[[varname[[A[[i]]]]]]|dataset[[varname[[B[[i]]]]]],1,0)
+    # N_pop PROP_TRUE
+    # N_TRUE = mean(get(expected_number))
+    
+    A<-list()      #numeric vector:  first component of the composites
+    B<-list()      #numeric vector:  second component of the composites
+    varname<-copy(components)
+    for (comp in composites){
+      A<-append(A, list(comp[[1]]))
+      B<-append(B, list(comp[[2]]))
+      tmp_lenght <- length(varname) + 1
+      varname <- append(varname, paste("alg", tmp_lenght, sep="")) # Create alg5, alg6, alg7,...
+      elem_or <- FALSE # binary vectors containing the column for the alg5 (and then alg6...)
+      for (elem in comp) {
+        for (single_alg in elem) {# cicle for every list inside each element of each composite
+          # sum the vectors by element using a or condition
+          elem_or <- elem_or|dataset[[varname[[single_alg]]]]
+        }
+      }
+      # Apply the resulting vector to the column
+      dataset[[varname[[tmp_lenght]]]] <- as.integer(elem_or)
     }
     
     #save the first dataset 
@@ -147,25 +160,19 @@ ApplyComponentStrategy <- function(dataset,
       save(list=sapply(strsplit(intermediate_output_name, "/"), tail, 1), file=paste0(intermediate_output_name,".RData")) 
     }
     
-    
     ##############################################
     
-    algA<-vector()   #character vector: each string is the label of the corresponding first component of the composites
-    algB<-vector()   #character vector: each string is the label of the corresponding second component of the composites
-    x=1
-    for (i in 0+1:tot){
-      if(i<=numcomponents){
-        algA[[i]]<-varname[[i]]
-        algB[[i]]<-0
-      }else{
-        algA[[i]]<-varname[[A[[x]]]]
-        algB[[i]]<-varname[[B[[x]]]]
-        x=x+1
-      }
+    algA<-copy(components)  #character vector: each string is the label of the corresponding first component of the composites
+    algB<-integer(numcomponents) #character vector: each string is the label of the corresponding second component of the composites
+    
+    for (i in 1:numcomposites) {
+      algA<-append(algA, varname[[A[[i]]]])
+      algB<-append(algB, varname[[B[[i]]]])
     }
+    
     ##############################################
     
-    if (is.null(strata)==T){
+    if (is.null(strata)){
       dim=1
     }else{
       n<-list()          #list of character vector: levels of the variables containing strata   
@@ -179,28 +186,23 @@ ApplyComponentStrategy <- function(dataset,
     ord_algA<-vector()  #numbers corresponding to the first component of the composites
     ord_algB<-vector()  #numbers corresponding to the second component of the composites
     ord_alg<-vector()   #labels
-    x=1
-    for (i in 0+1:tot){
-      if(i<=numcomponents){
-        ord_algA<-rbind(ord_algA,cbind(rep("-",dim)))
-        ord_algB<-rbind(ord_algB,cbind(rep("-",dim)))
-        ord_alg<-rbind(ord_alg,cbind(rep(paste0(i,": ",labels_of_components[[i]] ),dim)))
-      }else{
-        ord_algA<-rbind(ord_algA,cbind(rep(A[[x]],dim)))
-        ord_algB<-rbind(ord_algB,cbind(rep(B[[x]],dim)))
-        ord_alg<-rbind(ord_alg,cbind(rep(paste0(i,": ",labels_of_composites[[x]]),dim)))
-        x=x+1
-      }
+    
+    ord_algA<-c(ord_algA,rep("-",dim*numcomponents))
+    ord_algB<-c(ord_algB,rep("-",dim*numcomponents))
+    
+    for (i in 1:numcomponents) {
+      ord_alg<-c(ord_alg,rep(paste0(i,": ",labels_of_components[[i]]),dim))
     }
-    colnames(ord_alg)<-"ord_alg"
-    colnames(ord_algA)<-"ord_algA"
-    colnames(ord_algB)<-"ord_algB"
+    
+    for (i in 1:numcomposites){
+      ord_algA<-c(ord_algA,rep(A[[i]],dim))
+      ord_algB<-c(ord_algB,rep(B[[i]],dim))
+      ord_alg<-c(ord_alg,rep(paste0(i+numcomponents,": ",labels_of_composites[[i]]),dim))
+    }
     
     ##############################################
     
-    if (individual==F ){
-      count_var <-count_var   #parameter count_var(if the dataset is a dataset of counts)
-    }else{
+    if (individual){
       dataset[["n"]]<-1   #creates a variable containing 1 (if the dataset is at individual level)
       count_var<-'n'      
     }
@@ -213,45 +215,35 @@ ApplyComponentStrategy <- function(dataset,
     for (i in 0+1:tot){
       if(i<=numcomponents){
         N_<- rbind(N_,
-                   dataset[eval(parse(text = algA[[i]]))==1,
-                           sum(eval(parse(text = count_var)) ),
+                   dataset[get(algA[[i]])==1, sum(get(count_var)),
                            by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])   
         N_00<- rbind(N_00,
-                     dataset[eval(parse(text = algA[[i]]))!=1,
-                             sum(eval(parse(text = count_var)) ),
+                     dataset[get(algA[[i]])!=1, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_01<- rbind(N_01,
-                     dataset[eval(parse(text = algA[[i]]))==1,
-                             0,
+                     dataset[get(algA[[i]])==1, 0,
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_10<- rbind(N_10,
-                     dataset[eval(parse(text = algA[[i]]))==1,
-                             0,
+                     dataset[get(algA[[i]])==1, 0,
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_11<- rbind(N_11,
-                     dataset[eval(parse(text = algA[[i]]))==1,
-                             0,
+                     dataset[get(algA[[i]])==1, 0,
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
       }else{
         N_<- rbind(N_,
-                   dataset[eval(parse(text = algA[[i]]))==1 | eval(parse(text = algB[[i]]))==1 ,
-                           sum(eval(parse(text = count_var)) ),
+                   dataset[get(algA[[i]])==1 | get(algB[[i]])==1, sum(get(count_var)),
                            by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_00<- rbind(N_00,
-                     dataset[eval(parse(text = algA[[i]]))!=1 & eval(parse(text = algB[[i]]))!=1 ,
-                             sum(eval(parse(text = count_var)) ),
+                     dataset[get(algA[[i]])!=1 & get(algB[[i]])!=1, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_01<- rbind(N_01,
-                     dataset[eval(parse(text = algA[[i]]))==0 & eval(parse(text = algB[[i]]))==1 ,
-                             sum(eval(parse(text = count_var)) ),
+                     dataset[get(algA[[i]])==0 & get(algB[[i]])==1, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_10<- rbind(N_10,
-                     dataset[eval(parse(text = algA[[i]]))==1 & eval(parse(text = algB[[i]]))==0 ,
-                             sum(eval(parse(text = count_var)) ),
+                     dataset[get(algA[[i]])==1 & get(algB[[i]])==0, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         N_11<- rbind(N_11,
-                     dataset[eval(parse(text = algA[[i]]))==1 & eval(parse(text = algB[[i]]))==1 ,
-                             sum(eval(parse(text = count_var)) ),
+                     dataset[get(algA[[i]])==1 & get(algB[[i]])==1, sum(get(count_var)),
                              by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
       }  
     }
@@ -273,14 +265,14 @@ ApplyComponentStrategy <- function(dataset,
     if (!is.null(expected_number)==TRUE){     
       
       N_TRUE<-rbind()
-      for (i in 0+1:tot){
+      for (i in 1:tot){
         if(i<=numcomponents){
-          N_TRUE<-rbind(N_TRUE,dataset[eval(parse(text = algA[[i]]))==1,
-                                       mean(eval(parse(text = expected_number)) ),
+          N_TRUE<-rbind(N_TRUE,dataset[get(algA[[i]])==1,
+                                       mean(get(expected_number)),
                                        by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         }else{
-          N_TRUE<-rbind(N_TRUE,dataset[eval(parse(text = algA[[i]]))==1| eval(parse(text = algB[[i]]))==1 ,
-                                       mean(eval(parse(text = expected_number)) ),
+          N_TRUE<-rbind(N_TRUE,dataset[get(algA[[i]])==1| get(algB[[i]])==1 ,
+                                       mean(get(expected_number)),
                                        by=eval(if (!is.null(strata) == T) {by = eval(flatten_chr(strata))})])
         }
       }
