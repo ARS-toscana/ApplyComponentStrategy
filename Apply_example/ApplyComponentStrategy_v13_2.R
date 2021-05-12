@@ -11,14 +11,8 @@
 #' @param intermediate_output (boolean, default=FALSE). If TRUE, an intermediate dataset is saved in ".RData".
 #' @param intermediate_output_name (str, default="intermediate_output_dataset"). If intermediate_output=TRUE this is the name assigned to the intermediate dataset. (path is comprised in the name,if any).
 #' @param components (list of str, default=NULL). List of the names of the binary variables associated to the components.
-<<<<<<< HEAD
-#' @param composites (list of pairs of integers, default=NULL). Each pair is associated to a composite algorithm; it contains the numbering in the two algorithms that form the component; the numbering refers to the order in the list -components-, or to the order of this list itself, but in the latter case the numbering starts from the number of components.
-#' @param composites_to_be_compared (list of integers, default=NULL). Each list is associated to a composite algorithm, the integers refer to the components, therefore the integers must be <= the number of components
-#' @param labels_of_composites_to_be_compared(list of str, optional, default=components). This list must have the same length as -composites_to_be_compared-; each string is the label of the corresponding composite.
-=======
 #' @param composites_to_be_compared(list of integers, default=NULL). Each list is associated to a composite algorithm, the integers refer to the components, therefore the integers must be <= the number of components
 #' @param composites (list of pairs of integers, default=NULL). Each pair is associated to a pair of algorithms to be compared; it contains the numbering of the two algorithms that form the component; the numbering refers to the order in the list -c(components, composites_to_be_compared)
->>>>>>> 8ba5fb980fa833520d223360b39c5d368069e78f
 #' @param labels_of_components (list of str, optional, default=components). This list must have the same length as -components-; each string is the label of the corresponding component.
 #' @param labels_of_composites_to_be_compared(list of str, optional, default=components). This list must have the same length as -composites_to_be_compared-; each string is the label of the corresponding composite.
 #' @param labels_of_composites (list of str, optional, default=composites). This list must have the same length as -composites-; each string is the label of the corresponding component.
@@ -51,7 +45,6 @@ ApplyComponentStrategy <- function(dataset,
                                    intermediate_output=F,
                                    intermediate_output_name="intermediate_output_dataset",
                                    components=NULL,  #
-                                   composites_to_be_compared=NULL,
                                    composites=NULL,  #
                                    composites_to_be_compared=NULL,
                                    labels_of_composites_to_be_compared=NULL, 
@@ -147,13 +140,8 @@ ApplyComponentStrategy <- function(dataset,
     
     numcomposites<-length(composites)  #number of composites
     numcomponents=length(components)   #number of components
-<<<<<<< HEAD
-    numcomponents2bcomp <- length(composites_to_be_compared)
-    tot<-numcomposites+numcomponents+numcomponents2bcomp
-=======
     numcomposites2becomp <- length(composites_to_be_compared)
     tot<-numcomposites+numcomponents + numcomposites2becomp
->>>>>>> 8ba5fb980fa833520d223360b39c5d368069e78f
     
     #####################################################################
     ##############   composites_to_be_compared       ####################    
