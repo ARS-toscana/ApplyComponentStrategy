@@ -1,7 +1,7 @@
 #' 'ApplyComponentStrategy'
 #' 
 #'ApplyComponentStrategy takes as input 
-#'. a dataset where component algorithms have been assigned, and the instructions to build composite algorithms based on them. It produces: a dataset where the composites have been calculated; a dataset where the overlap of selected pairs of algorithms is computed; as an option, a graph that allows exploring the impact of the overlap. The input and output datasets may be either at individual level, or datasets of counts.   
+#'. a dataset where component algorithms have been assigned, and the instructions to build composite algorithms based on them. It produces: a dataset where the pairs_to_be_compared have been calculated; a dataset where the overlap of selected pairs of algorithms is computed; as an option, a graph that allows exploring the impact of the overlap. The input and output datasets may be either at individual level, or datasets of counts.   
 #'. alternatively, a dataset where the overlap of selected pairs of algorithms is computed. It produces a graph that allows exploring the impact of the overlap.
 #'
 #'ApplyComponentStrategy calls CreateFigureComponentStrategy to produce the graph.
@@ -11,14 +11,13 @@
 #' @param intermediate_output (boolean, default=FALSE). If TRUE, an intermediate dataset is saved in ".RData".
 #' @param intermediate_output_name (str, default="intermediate_output_dataset"). If intermediate_output=TRUE this is the name assigned to the intermediate dataset. (path is comprised in the name,if any).
 #' @param components (list of str, default=NULL). List of the names of the binary variables associated to the components.
-#' @param composites (list of pairs of integers, default=NULL). Each pair is associated to a composite algorithm; it contains the numbering in the two algorithms that form the component; the numbering refers to the order in the list -components-, or to the order of this list itself, but in the latter case the numbering starts from the number of components.
-#' @param composites_to_be_compared (list of integers, default=NULL). Each list is associated to a composite algorithm, the integers refer to the components, therefore the integers must be <= the number of components
-#' @param labels_of_composites_to_be_compared(list of str, optional, default=components). This list must have the same length as -composites_to_be_compared-; each string is the label of the corresponding composite.
-#' @param composites_to_be_compared(list of integers, default=NULL). Each list is associated to a composite algorithm, the integers refer to the components, therefore the integers must be <= the number of components
-#' @param composites (list of pairs of integers, default=NULL). Each pair is associated to a pair of algorithms to be compared; it contains the numbering of the two algorithms that form the component; the numbering refers to the order in the list -c(components, composites_to_be_compared)
+#' @param composites_to_be_created (list of integers, default=NULL). Each list is associated to a composite algorithm, the integers refer to the components, therefore the integers must be <= the number of components
+#' @param labels_of_composites_to_be_created(list of str, optional, default=components). This list must have the same length as -composites_to_be_created-; each string is the label of the corresponding composite.
+#' @param composites_to_be_created(list of integers, default=NULL). Each list is associated to a composite algorithm, the integers refer to the components, therefore the integers must be <= the number of components
+#' @param pairs_to_be_compared (list of pairs of integers, default=NULL). Each pair is associated to a pair of algorithms to be compared; it contains the numbering of the two algorithms that form the component; the numbering refers to the order in the list -c(components, composites_to_be_created)
 #' @param labels_of_components (list of str, optional, default=components). This list must have the same length as -components-; each string is the label of the corresponding component.
-#' @param labels_of_composites_to_be_compared(list of str, optional, default=components). This list must have the same length as -composites_to_be_compared-; each string is the label of the corresponding composite.
-#' @param labels_of_composites (list of str, optional, default=composites). This list must have the same length as -composites-; each string is the label of the corresponding component.
+#' @param labels_of_composites_to_be_created(list of str, optional, default=components). This list must have the same length as -composites_to_be_created-; each string is the label of the corresponding composite.
+#' @param labels_of_pairs_to_be_compared (list of str, optional, default=pairs_to_be_compared). This list must have the same length as -pairs_to_be_compared-; each string is the label of the corresponding component.
 #' @param expected_number (str, optional, default=NULL). Variable containing the number of persons expected to be observed with the study variable of interest (in the corresponding stratum, if any).
 #' @param count_var (str, only if individual=FALSE). Name of the variable containting the counts.
 #' @param strata (list of str, optional, default=NULL). List of the names of the variables containing covariates or strata.
@@ -46,11 +45,11 @@ ApplyComponentStrategy <- function(dataset,
                                    intermediate_output=F,
                                    intermediate_output_name="intermediate_output_dataset",
                                    components=NULL,  #
-                                   composites_to_be_compared=NULL,
-                                   composites=NULL,
-                                   labels_of_composites_to_be_compared=NULL, 
+                                   composites_to_be_created=NULL,
+                                   pairs_to_be_compared=NULL,
+                                   labels_of_composites_to_be_created=NULL, 
                                    labels_of_components=components,
-                                   labels_of_composites=composites,
+                                   labels_of_pairs_to_be_compared=pairs_to_be_compared,
                                    count_var=NULL,
                                    expected_number=NULL,
                                    nameN="N",
@@ -84,28 +83,28 @@ ApplyComponentStrategy <- function(dataset,
     if (!require("ggplot2")) install.packages("ggplot2")
     library(ggplot2)
     
-    ################ parameter composites #############################
+    ################ parameter pairs_to_be_compared #############################
     ## check that it is a list (do NOT use is.list())
-    if (!inherits(composites, "list")){  
-      stop("parameter composites must be a list of one dimensional vectors, each of them containing integers")
+    if (!inherits(pairs_to_be_compared, "list")){  
+      stop("parameter pairs_to_be_compared must be a list of one dimensional vectors, each of them containing integers")
     }
     
-    if (!inherits(composites_to_be_compared, "list")){  
-      stop("parameter composites_to_be_compared must be a list of one dimensional vectors, each of them containing integers")
+    if (!inherits(composites_to_be_created, "list")){  
+      stop("parameter composites_to_be_created must be a list of one dimensional vectors, each of them containing integers")
     }
     
     ## check that it is a list of lists
     check_and_transform <- function(tmp_elem) {
-      error_message = "parameter composites must be a list of one dimensional vectors, each of them containing integers"
+      error_message = "parameter pairs_to_be_compared must be a list of one dimensional vectors, each of them containing integers"
       if (inherits(tmp_elem, "numeric")){  ## check if atomic -> transform to list
         tmp_elem <- as.list(tmp_elem)
       }
       if (!inherits(tmp_elem, "list") | length(tmp_elem) < 2) { ## check if list and has at least two elements
         stop(message)
-      } else if (length(tmp_elem) > length(components)) { ## number in composites <= number of algorithm
-        stop("the numbers of parameter composites must be less or equal than the number of algorithms")
+      } else if (length(tmp_elem) > length(components)) { ## number in pairs_to_be_compared <= number of algorithm
+        stop("the numbers of parameter pairs_to_be_compared must be less or equal than the number of algorithms")
       }
-      # Apply the function is_integer to all composites and in case of errors use the predefined message
+      # Apply the function is_integer to all pairs_to_be_compared and in case of errors use the predefined message
       tmp_elem <- tryCatch(lapply(tmp_elem, is_integer, error_message),
                            error = function(e) {stop(error_message)})
       return(tmp_elem)
@@ -120,9 +119,9 @@ ApplyComponentStrategy <- function(dataset,
       return(tmp_elem)
     }
     
-    # Apply the chec on composites
-    composites = lapply(composites, check_and_transform)
-    composites_to_be_compared = lapply(composites_to_be_compared, check_and_transform)
+    # Apply the chec on pairs_to_be_compared
+    pairs_to_be_compared = lapply(pairs_to_be_compared, check_and_transform)
+    composites_to_be_created = lapply(composites_to_be_created, check_and_transform)
     
     ################## parameter labels_of_components ##################
     ## check length of parameter labels_of_components
@@ -130,8 +129,8 @@ ApplyComponentStrategy <- function(dataset,
       stop("parameter labels_of_components must have the same length as components")
     }
     
-    if (length(labels_of_composites_to_be_compared)!=length(composites_to_be_compared)){
-      stop("parameter labels_of_composites_to_be_compared must have the same length as composites_to_be_compared")
+    if (length(labels_of_composites_to_be_created)!=length(composites_to_be_created)){
+      stop("parameter labels_of_composites_to_be_created must have the same length as composites_to_be_created")
     }
     
     ####################################################################
@@ -140,19 +139,19 @@ ApplyComponentStrategy <- function(dataset,
     
     ######################################################################
     
-    numcomposites<-length(composites)  #number of composites
+    numcomposites<-length(pairs_to_be_compared)  #number of pairs_to_be_compared
     numcomponents=length(components)   #number of components
-    numcomposites2becomp <- length(composites_to_be_compared) 
+    numcomposites2becomp <- length(composites_to_be_created) 
     tot<-numcomposites+numcomponents + numcomposites2becomp
 
     #####################################################################
-    ##############   composites_to_be_compared       ####################    
+    ##############   composites_to_be_created       ####################    
     #####################################################################
     varname<-copy(components)
     iteration = 0
-    for (c in composites_to_be_compared){
+    for (c in composites_to_be_created){
       iteration <-  iteration + 1
-      varname <- append(varname, labels_of_composites_to_be_compared[[iteration]]) # Create alg5, alg6, alg7,...
+      varname <- append(varname, labels_of_composites_to_be_created[[iteration]]) # Create alg5, alg6, alg7,...
       elem_or <- FALSE # binary vectors containing the column for the alg5 (and then alg6...)
       for (elem in c) {
         for (single_alg in elem) {# cicle for every list inside each element of each composite
@@ -164,7 +163,7 @@ ApplyComponentStrategy <- function(dataset,
       dataset[[varname[[ length(varname) ]]]] <- as.integer(elem_or)
     }
     
-    components <- c(components, labels_of_composites_to_be_compared)
+    components <- c(components, labels_of_composites_to_be_created)
     numcomponents <- numcomponents + numcomposites2becomp
     #####################################################################   
     
@@ -173,10 +172,10 @@ ApplyComponentStrategy <- function(dataset,
     # N_pop PROP_TRUE
     # N_TRUE = mean(get(expected_number))
     
-    A<-list()      #numeric vector:  first component of the composites
-    B<-list()      #numeric vector:  second component of the composites
+    A<-list()      #numeric vector:  first component of the pairs_to_be_compared
+    B<-list()      #numeric vector:  second component of the pairs_to_be_compared
     varname<-copy(components)
-    for (comp in composites){
+    for (comp in pairs_to_be_compared){
       A<-append(A, list(comp[[1]]))
       B<-append(B, list(comp[[2]]))
       tmp_lenght <- length(varname) + 1
@@ -200,8 +199,8 @@ ApplyComponentStrategy <- function(dataset,
     
     ##############################################
     
-    algA<-copy(components)  #character vector: each string is the label of the corresponding first component of the composites
-    algB<-integer(numcomponents) #character vector: each string is the label of the corresponding second component of the composites
+    algA<-copy(components)  #character vector: each string is the label of the corresponding first component of the pairs_to_be_compared
+    algB<-integer(numcomponents) #character vector: each string is the label of the corresponding second component of the pairs_to_be_compared
     
     for (i in 1:numcomposites) {
       algA<-append(algA, varname[[A[[i]]]])
@@ -221,14 +220,14 @@ ApplyComponentStrategy <- function(dataset,
     }
     
     
-    ord_algA<-vector()  #numbers corresponding to the first component of the composites
-    ord_algB<-vector()  #numbers corresponding to the second component of the composites
+    ord_algA<-vector()  #numbers corresponding to the first component of the pairs_to_be_compared
+    ord_algB<-vector()  #numbers corresponding to the second component of the pairs_to_be_compared
     ord_alg<-vector()   #labels
     
     ord_algA<-c(ord_algA,rep("-",dim*numcomponents))
     ord_algB<-c(ord_algB,rep("-",dim*numcomponents))
     
-    labels_of_components <- c(labels_of_components, labels_of_composites_to_be_compared)
+    labels_of_components <- c(labels_of_components, labels_of_composites_to_be_created)
     
     for (i in 1:numcomponents) {
       ord_alg<-c(ord_alg,rep(paste0(i,": ",labels_of_components[[i]]),dim))
@@ -237,7 +236,7 @@ ApplyComponentStrategy <- function(dataset,
     for (i in 1:numcomposites){
       ord_algA<-c(ord_algA,rep(A[[i]],dim))
       ord_algB<-c(ord_algB,rep(B[[i]],dim))
-      ord_alg<-c(ord_alg,rep(paste0(i+numcomponents,": ",labels_of_composites[[i]]),dim))
+      ord_alg<-c(ord_alg,rep(paste0(i+numcomponents,": ",labels_of_pairs_to_be_compared[[i]]),dim))
     }
     
     ##############################################

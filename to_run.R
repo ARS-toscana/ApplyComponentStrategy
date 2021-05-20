@@ -33,36 +33,30 @@ source("CreateFigureComponentStrategy_v4.R")
 #           ASSIGN PARAMETERS OF THE INPUT FILES
 ###################################################################
 
-input<-fread(paste0(dirinput,"input.csv"))
+input<-fread(paste0(dirinput,"ese1.csv"))
 
 
-output<- ApplyComponentStrategy(dataset = input,
-                                individual = F,         ## F -> data counts
-                                intermediate_output=T, 
-                                intermediate_output_name=paste0(dirtemp,"intermediate output"), 
-                                components=c("alg1","alg2","alg3","alg4"),
-                                composites_to_be_compared=list(list(1, 3),
-                                                               list(2, 4),
-                                                               list(1, 2),
-                                                               list(3, 4)),
-                                labels_of_composites_to_be_compared=c("All Narrow", "All possible", "Meaning H", "Meaning P"),
-                                composites=list(
-                                   list(1, 3), 
-                                   list(2, 4),
-                                   list(5,6),
-                                   list(7,8)),
-                                labels_of_components=c(
-                                  "Narrow, meaning H",
-                                  "Possible, meaning H",
-                                  "Narrow, meaning P",
-                                  "Possible, meaning P"),
-                                labels_of_composites = c("Narrow H vs Narrow P", "Possible H vs Possible P", "Narrow vs Possible", "Meaning H vs Meaning P"),
-                                count_var = 'persons',      ## only if individual = F
-                                expected_number="N_TRUE",   ## optional
-                                K=1000,
-                               #strata=list("orderDS") ,
-                               aggregate=F,
-                               dirfigure= dirfigure,
-                               figure_name = "Example_1" ,
-                               output_name= paste0(diroutput,"output_dataset")
-                               )
+output <- ApplyComponentStrategy(dataset = input,
+                                 individual = F,
+                                 components = c("emergency_room_diagnosis",
+                                                "hospitalisation_primary",
+                                                "hospitalisation_secondary"),
+                                 labels_of_components = c("emergency_room_diagnosis",
+                                                          "hospitalisation_primary",
+                                                          "hospitalisation_secondary"),
+                                 composites_to_be_created=list(list(2, 3)),
+                                 labels_of_composites_to_be_created=c(
+                                   "H, all"),
+                                 pairs_to_be_compared=list(
+                                   list(1,4),
+                                   list(2,3)),
+                                 labels_of_pairs_to_be_compared = c(
+                                   "ER  vs H All",
+                                   "H primary vs H secondary"),
+                                 figure_name="example_1",
+                                 K=10000,
+                                 count_var="N",
+                                 figure=T,
+                                 aggregate=F ,
+                                 dirfigure= dirfigure
+)
