@@ -24,7 +24,7 @@ suppressWarnings(if (!file.exists(dirfigure)) dir.create(file.path( dirfigure)))
 
 # load the function
 setwd(thisdir)
-source("ApplyComponentStrategy_v13_2.R")
+source("ApplyComponentStrategy_v15.R")
 source("CreateFigureComponentStrategy_v4.R")
 
 
@@ -55,5 +55,6 @@ output <- ApplyComponentStrategy(dataset = input,
                                  count_var="N",
                                  figure=T,
                                  aggregate=F ,
+                                 output_name= paste0( diroutput, "output_example"),
                                  dirfigure= dirfigure
 )
