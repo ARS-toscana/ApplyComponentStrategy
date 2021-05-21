@@ -98,7 +98,7 @@ CreateFigureComponentStrategy <- function(dataset,
     geom_bar(stat = "identity",width=0.7,color="black")+        #identity -> stacked bar
     scale_fill_manual(values = c("#999999", "#333333", "#FFFFFF"),   #colors  
                       breaks=c("PROP_10", "PROP_11", "PROP_01"),
-                      labels=c("Left-hand side member only","Both members", "Right-hand side member side") )+   #order of the legend
+                      labels=c("Left-hand side component only","Both components", "Right-hand side component side") )+   #order of the legend
     coord_flip()+                           #horizontal
     ylab(paste0("Proportion (per ",K,")"))+
     xlab(NULL)+
